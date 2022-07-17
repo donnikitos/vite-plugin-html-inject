@@ -1,0 +1,45 @@
+{
+	"name": "vite-plugin-html-inject",
+	"version": "1.0.0",
+	"description": "Split your index.html into multiple files and inject them where ever you want!",
+	"files": [
+		"dist"
+	],
+	"main": "./dist/index.umd.js",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"require": "./dist/index.js"
+		}
+	},
+	"scripts": {
+		"build": "npx tsc"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+ssh://git@github.com/donnikitos/vite-plugin-html-inject.git"
+	},
+	"keywords": [
+		"vite",
+		"load html",
+		"split html",
+		"inject html",
+		"html",
+		"html-loader",
+		"loader"
+	],
+	"author": "Nikita 'donnikitos' Nitichevski <me@donnikitos.com> (https://donnikitos.com/)",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/donnikitos/vite-plugin-html-inject/issues"
+	},
+	"homepage": "https://github.com/donnikitos/vite-plugin-html-inject#readme",
+	"dependencies": {},
+	"devDependencies": {
+		"typescript": "^4.7.4",
+		"@types/node": "^18.0.5",
+		"vite": "^3.0.0"
+	}
+}
