@@ -2,8 +2,8 @@ import { normalizePath, Plugin, ResolvedConfig } from 'vite';
 import path from 'path';
 import fs from 'fs';
 
-const tagMatcher = new RegExp('<load ="([^"]+)"([^{]*?)/>', 'g');
-const attrMatcher = new RegExp('(?:(?: )?([a-z0-9_-]+)(?:="([^"]*)"|))', 'gi');
+const tagMatcher = new RegExp('<load(?:.*?)="([^"]+)"(.*?)/>', 'gs');
+const attrMatcher = new RegExp('(?:(?:\s)?([a-z0-9_-]+)(?:="([^"]*)"|))', 'gi');
 const replaceAttrMatcher = new RegExp('{=[$]([a-z0-9_-]+)}', 'gi');
 
 type InjectHTMLConfig = { replace?: { undefined?: string }; debug?: { logPath?: boolean } };
