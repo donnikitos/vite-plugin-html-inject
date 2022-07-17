@@ -17,7 +17,7 @@
 	},
 	"scripts": {
 		"build": "npx unbuild",
-		"prepublish": "npm run build"
+		"prepack": "npm run build"
 	},
 	"repository": {
 		"type": "git",
