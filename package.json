@@ -25,6 +25,7 @@
 	},
 	"keywords": [
 		"vite",
+		"vite-plugin",
 		"load html",
 		"split html",
 		"inject html",
