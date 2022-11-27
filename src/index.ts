@@ -54,7 +54,7 @@ function injectHTML(cfg?: InjectHTMLConfig): Plugin {
 				for (const attr of attrs.matchAll(attrMatcher)) {
 					data = data.replace(`{=$${attr[1]}}`, attr[2]);
 				}
-				data = data.replaceAll(
+				data = data.replace(
 					replaceAttrMatcher,
 					cfg?.replace?.undefined ?? '$&',
 				);
