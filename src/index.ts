@@ -36,12 +36,14 @@ function injectHTML(cfg?: InjectHTMLConfig): Plugin {
 
 			if (!(url.endsWith('.htm') || url.endsWith('.html'))) {
 				['html', 'htm'].some((item) => {
+					const fileName = '/index.' + item;
+
 					const filePath = normalizePath(
-						path.join(root, url, `/index.${item}`),
+						path.join(root, url, fileName),
 					);
 
 					if (fs.existsSync(filePath)) {
-						url += `/index.${item}`;
+						url += fileName;
 
 						return true;
 					}
