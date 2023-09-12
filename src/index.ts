@@ -9,6 +9,10 @@ const attrMatcher = new RegExp(
 );
 const replaceAttrMatcher = new RegExp('{=[$]([a-z0-9_-]+)}', 'gi');
 
+function escapeRegExp(input: string) {
+	return input.replace(/[.*+?^${}()|[\]\\]/g, '$&');
+}
+
 type InjectHTMLConfig = {
 	replace?: { undefined?: string };
 	debug?: { logPath?: boolean };
@@ -63,7 +67,11 @@ function injectHTML(cfg?: InjectHTMLConfig): Plugin {
 				let data = fs.readFileSync(filePath, 'utf8');
 
 				for (const attr of attrs.matchAll(attrMatcher)) {
-					data = data.replaceAll(`{=$${attr[1]}}`, attr[2]);
+					const attrRegExp = new RegExp(
+						'{=\\$' + escapeRegExp(attr[1]) + '}',
+						'g',
+					);
+					data = data.replace(attrRegExp, attr[2]);
 				}
 				data = data.replace(
 					replaceAttrMatcher,
