@@ -1,6 +1,6 @@
 {
 	"name": "vite-plugin-html-inject",
-	"version": "1.0.1",
+	"version": "1.0.4",
 	"description": "Split your index.html into multiple files and inject them where ever you want!",
 	"files": [
 		"dist"
