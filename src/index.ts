@@ -17,6 +17,8 @@ type InjectHTMLConfig = {
 function injectHTML(cfg?: InjectHTMLConfig): Plugin {
 	let config: undefined | ResolvedConfig;
 
+	const fileList = new Set<string>();
+
 	async function renderSnippets(code: string, codePath: string) {
 		if (!config) {
 			return code;
@@ -54,6 +56,7 @@ function injectHTML(cfg?: InjectHTMLConfig): Plugin {
 			if (cfg?.debug?.logPath) {
 				console.log('Trying to include ', filePath);
 			}
+			fileList.add(filePath);
 
 			let out = tag;
 			try {
@@ -85,6 +88,14 @@ function injectHTML(cfg?: InjectHTMLConfig): Plugin {
 		name: 'static-html-loader',
 		configResolved(resolvedConfig) {
 			config = resolvedConfig;
+		},
+		handleHotUpdate({ file, server }) {
+			if (fileList.has(file)) {
+				server.ws.send({
+					type: 'full-reload',
+					path: '*',
+				});
+			}
 		},
 		transformIndexHtml: {
 			enforce: 'pre',
