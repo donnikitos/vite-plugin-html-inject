@@ -3,10 +3,16 @@ import path from 'path';
 import fs from 'fs';
 
 const tagMatcher = new RegExp('<load(?:.*?)="([^"]+)"(.*?)/>', 'gs');
-const attrMatcher = new RegExp('(?:(?:\\s)?([a-z0-9_-]+)(?:="([^"]*)"|))', 'gi');
+const attrMatcher = new RegExp(
+	'(?:(?:\\s)?([a-z0-9_-]+)(?:="([^"]*)"|))',
+	'gi',
+);
 const replaceAttrMatcher = new RegExp('{=[$]([a-z0-9_-]+)}', 'gi');
 
-type InjectHTMLConfig = { replace?: { undefined?: string }; debug?: { logPath?: boolean } };
+type InjectHTMLConfig = {
+	replace?: { undefined?: string };
+	debug?: { logPath?: boolean };
+};
 
 function injectHTML(cfg?: InjectHTMLConfig): Plugin {
 	let config: undefined | ResolvedConfig;
@@ -52,7 +58,7 @@ function injectHTML(cfg?: InjectHTMLConfig): Plugin {
 				let data = fs.readFileSync(filePath, 'utf8');
 
 				for (const attr of attrs.matchAll(attrMatcher)) {
-					data = data.replace(`{=$${attr[1]}}`, attr[2]);
+					data = data.replaceAll(`{=$${attr[1]}}`, attr[2]);
 				}
 				data = data.replace(
 					replaceAttrMatcher,
