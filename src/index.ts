@@ -2,24 +2,36 @@ import { normalizePath, Plugin, ResolvedConfig } from 'vite';
 import path from 'path';
 import fs from 'fs';
 
-const tagMatcher = new RegExp('<load(?:.*?)="([^"]+)"(.*?)/>', 'gs');
-const attrMatcher = new RegExp(
-	'(?:(?:\\s)?([a-z0-9_-]+)(?:="([^"]*)"|))',
-	'gi',
-);
-const replaceAttrMatcher = new RegExp('{=[$]([a-z0-9_-]+)}', 'gi');
+const attrNameExpr = '[a-z0-9_-]+';
+const attrDataExpr = '[^"]*';
+
+const attrMatcher = new RegExp(`(${attrNameExpr}|)="(${attrDataExpr})"`, 'gsi');
+const replaceAttrMatcher = new RegExp(`{=\\$${attrNameExpr}}`, 'gsi');
 
 function escapeRegExp(input: string) {
 	return input.replace(/[.*+?^${}()|[\]\\]/g, '$&');
 }
 
 type InjectHTMLConfig = {
+	tagName?: string;
+	sourceAttr?: string;
 	replace?: { undefined?: string };
 	debug?: { logPath?: boolean };
 };
 
-function injectHTML(cfg?: InjectHTMLConfig): Plugin {
+function injectHTML(pluginConfig?: InjectHTMLConfig): Plugin {
+	const {
+		tagName = 'load',
+		sourceAttr = 'src',
+		...cfg
+	} = { ...pluginConfig };
+
 	let config: undefined | ResolvedConfig;
+
+	const tagMatcher = new RegExp(
+		`<${tagName}((?:\\s{1,}(${attrNameExpr}|)="${attrDataExpr}")+)\\s*/>`,
+		'gsi',
+	);
 
 	const fileList = new Set<string>();
 
@@ -31,7 +43,21 @@ function injectHTML(cfg?: InjectHTMLConfig): Plugin {
 		const matches = code.matchAll(tagMatcher);
 
 		for (const match of matches) {
-			let [tag, url, attrs] = match;
+			let [tag, _attrs] = match;
+
+			const attrs = new Map();
+			for (const [, name, value] of _attrs.trim().matchAll(attrMatcher)) {
+				attrs.set(name || sourceAttr, value);
+			}
+
+			let url = attrs.get(sourceAttr);
+
+			if (typeof url !== 'string') {
+				throw new Error(
+					`injectHTML: Source attribute '${sourceAttr}' missing in\r\n${tag}`,
+				);
+			}
+
 			let root = config.root;
 
 			if (url.startsWith('.')) {
@@ -57,7 +83,7 @@ function injectHTML(cfg?: InjectHTMLConfig): Plugin {
 			}
 
 			const filePath = normalizePath(path.join(root, url));
-			if (cfg?.debug?.logPath) {
+			if (pluginConfig?.debug?.logPath) {
 				console.log('Trying to include ', filePath);
 			}
 			fileList.add(filePath);
@@ -66,24 +92,29 @@ function injectHTML(cfg?: InjectHTMLConfig): Plugin {
 			try {
 				let data = fs.readFileSync(filePath, 'utf8');
 
-				for (const attr of attrs.matchAll(attrMatcher)) {
+				for (const [name, value] of attrs) {
 					const attrRegExp = new RegExp(
-						'{=\\$' + escapeRegExp(attr[1]) + '}',
-						'g',
+						'{=\\$' + escapeRegExp(name) + '}',
+						'gs',
 					);
-					data = data.replace(attrRegExp, attr[2]);
+					// ^ Node version below 15.0 has no .replaceAll()
+
+					data = data.replace(attrRegExp, value);
 				}
-				data = data.replace(
-					replaceAttrMatcher,
-					cfg?.replace?.undefined ?? '$&',
-				);
+
+				if (cfg.replace?.undefined) {
+					data = data.replace(
+						replaceAttrMatcher,
+						cfg.replace.undefined,
+					);
+				}
 
 				out = await renderSnippets(data, url);
 			} catch (error) {
 				if (error instanceof Error) {
-					out = error.message;
+					throw new Error('injectHTML: ' + error.message);
 				}
-				console.error(out);
+				throw new Error(`${error}`);
 			}
 
 			code = code.replace(tag, out);
