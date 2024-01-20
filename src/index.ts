@@ -97,7 +97,7 @@ function injectHTML(pluginConfig?: InjectHTMLConfig): Plugin {
 						'{=\\$' + escapeRegExp(name) + '}',
 						'gs',
 					);
-					// ^ Node version below 15.0 has no .replaceAll()
+					// ^ Node below version 15.0 has no .replaceAll()
 
 					data = data.replace(attrRegExp, value);
 				}
@@ -139,6 +139,11 @@ function injectHTML(pluginConfig?: InjectHTMLConfig): Plugin {
 		transformIndexHtml: {
 			enforce: 'pre',
 			transform(html, ctx) {
+				return renderSnippets(html, ctx.path);
+			},
+			// ^ Keeping for Vite below version 4.0.0
+			order: 'pre',
+			handler(html, ctx) {
 				return renderSnippets(html, ctx.path);
 			},
 		},
