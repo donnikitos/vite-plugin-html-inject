@@ -124,7 +124,7 @@ function injectHTML(pluginConfig?: InjectHTMLConfig): Plugin {
 	}
 
 	return {
-		name: 'static-html-loader',
+		name: 'vite-plugin-html-inject',
 		configResolved(resolvedConfig) {
 			config = resolvedConfig;
 		},
