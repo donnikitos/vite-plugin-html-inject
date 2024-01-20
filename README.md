@@ -28,14 +28,14 @@ export default defineConfig({
 	</head>
 	<body>
 		<!-- Loads the specified .html file -->
-		<load ="src/html/header/branding.html" />
+		<load src="src/html/header/branding.html" />
 		<!-- Loads index.html or index.htm file inside the specified directory -->
-		<load ="src/html/header" />
+		<load src="src/html/header" />
 		<div>
-			<load ="src/html/body/sidebar.html" />
-			<load ="src/html/body" />
+			<load src="src/html/body/sidebar.html" />
+			<load src="src/html/body" />
 		</div>
-		<load ="src/html/footer" />
+		<load src="src/html/footer" />
 	</body>
 </html>
 ```
@@ -52,12 +52,12 @@ For example you can reuse a similarly styled link somewhere in your `index.html`
 <div class="some-cool-menu">
 	<!-- Load a HTML part -->
 	<load
-		="src/some-static-link.htm"
+		src="src/some-static-link.htm"
 		label="Go to DuckDuckGo"
 		href="https://duckduckgo.com/"
 	/>
 	<load
-		="src/some-static-link.htm"
+		src="src/some-static-link.htm"
 		label="Go to Google"
 		href="https://google.com"
 	/>
@@ -85,6 +85,29 @@ This will result in a dev and runtime generated index.html looking like
 	<a href="https://google.com" class="some-cool-link-style">Go to Google</a>
 </div>
 ...
+```
+
+## Customization
+
+You are able to customize the loader tag name and the source attribute name.\
+For example a configuration like:
+
+```js
+injectHTML({
+	tagName: 'loader', // Default is `load`
+	sourceAttr: 'file', // Default is `src`
+});
+```
+
+will replace:
+
+```html
+<!-- Load a HTML part -->
+<loader
+	file="src/some-static-link.htm"
+	label="Go to DuckDuckGo"
+	href="https://duckduckgo.com/"
+/>
 ```
 
 ## Debugging
