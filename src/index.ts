@@ -5,10 +5,6 @@ import fs from 'fs';
 const attrNameExpr = '[a-z0-9_-]+';
 const attrDataExpr = '[^"]*';
 
-const tagMatcher = new RegExp(
-	`<load((?:\\s{1,}(${attrNameExpr}|)="${attrDataExpr}")+)\\s*/>`,
-	'gsi',
-);
 const attrMatcher = new RegExp(`(${attrNameExpr}|)="(${attrDataExpr})"`, 'gsi');
 const replaceAttrMatcher = new RegExp(`{=\\$${attrNameExpr}}`, 'gsi');
 
@@ -17,14 +13,25 @@ function escapeRegExp(input: string) {
 }
 
 type InjectHTMLConfig = {
+	tagName?: string;
+	sourceAttr?: string;
 	replace?: { undefined?: string };
 	debug?: { logPath?: boolean };
 };
 
 function injectHTML(pluginConfig?: InjectHTMLConfig): Plugin {
-	const cfg = { ...pluginConfig };
+	const {
+		tagName = 'load',
+		sourceAttr = 'src',
+		...cfg
+	} = { ...pluginConfig };
 
 	let config: undefined | ResolvedConfig;
+
+	const tagMatcher = new RegExp(
+		`<${tagName}((?:\\s{1,}(${attrNameExpr}|)="${attrDataExpr}")+)\\s*/>`,
+		'gsi',
+	);
 
 	const fileList = new Set<string>();
 
@@ -40,10 +47,16 @@ function injectHTML(pluginConfig?: InjectHTMLConfig): Plugin {
 
 			const attrs = new Map();
 			for (const [, name, value] of _attrs.trim().matchAll(attrMatcher)) {
-				attrs.set(name || 'src', value);
+				attrs.set(name || sourceAttr, value);
 			}
 
-			let url = attrs.get('src');
+			let url = attrs.get(sourceAttr);
+
+			if (typeof url !== 'string') {
+				throw new Error(
+					`injectHTML: Source attribute '${sourceAttr}' missing in\r\n${tag}`,
+				);
+			}
 
 			let root = config.root;
 
@@ -99,9 +112,9 @@ function injectHTML(pluginConfig?: InjectHTMLConfig): Plugin {
 				out = await renderSnippets(data, url);
 			} catch (error) {
 				if (error instanceof Error) {
-					out = error.message;
+					throw new Error('injectHTML: ' + error.message);
 				}
-				console.error(out);
+				throw new Error(`${error}`);
 			}
 
 			code = code.replace(tag, out);
