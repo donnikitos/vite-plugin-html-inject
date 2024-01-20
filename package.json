@@ -41,9 +41,9 @@
 	"homepage": "https://github.com/donnikitos/vite-plugin-html-inject#readme",
 	"dependencies": {},
 	"devDependencies": {
-		"@types/node": "^18.0.5",
-		"typescript": "^4.7.4",
-		"unbuild": "^0.7.4",
-		"vite": "^3.0.0"
+		"@types/node": "^20.11.5",
+		"typescript": "^5.3.3",
+		"unbuild": "^2.0.0",
+		"vite": "^5.0.12"
 	}
 }
