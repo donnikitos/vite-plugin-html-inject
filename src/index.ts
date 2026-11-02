@@ -9,7 +9,7 @@ const attrMatcher = new RegExp(`(${attrNameExpr}|)="(${attrDataExpr})"`, 'gsi');
 const replaceAttrMatcher = new RegExp(`{=\\$${attrNameExpr}}`, 'gsi');
 
 function escapeRegExp(input: string) {
-	return input.replace(/[.*+?^${}()|[\]\\]/g, '$&');
+	return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 type InjectHTMLConfig = {
@@ -99,13 +99,14 @@ function injectHTML(pluginConfig?: InjectHTMLConfig): Plugin {
 					);
 					// ^ Node below version 15.0 has no .replaceAll()
 
-					data = data.replace(attrRegExp, value);
+					data = data.replace(attrRegExp, () => value);
 				}
 
-				if (cfg.replace?.undefined) {
+				const undefinedValue = cfg.replace?.undefined;
+				if (undefinedValue) {
 					data = data.replace(
 						replaceAttrMatcher,
-						cfg.replace.undefined,
+						() => undefinedValue,
 					);
 				}
 
@@ -117,7 +118,7 @@ function injectHTML(pluginConfig?: InjectHTMLConfig): Plugin {
 				throw new Error(`${error}`);
 			}
 
-			code = code.replace(tag, out);
+			code = code.replace(tag, () => out);
 		}
 
 		return code;
