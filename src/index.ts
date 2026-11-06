@@ -113,7 +113,11 @@ function injectHTML(pluginConfig?: InjectHTMLConfig): Plugin {
 					);
 				}
 
-				out = await renderSnippets(data, url);
+				out = await renderSnippets(data, {
+					...ctx,
+					path: '/' + normalizePath(path.relative(config.root, filePath)),
+					filename: filePath,
+				});
 			} catch (error) {
 				if (error instanceof Error) {
 					throw new Error('injectHTML: ' + error.message);
