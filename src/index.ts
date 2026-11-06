@@ -1,4 +1,9 @@
-import { IndexHtmlTransformContext, normalizePath, Plugin, ResolvedConfig } from 'vite';
+import {
+	IndexHtmlTransformContext,
+	normalizePath,
+	Plugin,
+	ResolvedConfig,
+} from 'vite';
 import path from 'path';
 import fs from 'fs';
 import htmlEnvHook from './htmlEnvHook';
@@ -21,11 +26,7 @@ type InjectHTMLConfig = {
 };
 
 function injectHTML(pluginConfig?: InjectHTMLConfig): Plugin {
-	const {
-		tagName = 'load',
-		sourceAttr = 'src',
-		...cfg
-	} = { ...pluginConfig };
+	const { tagName = 'load', sourceAttr = 'src', ...cfg } = { ...pluginConfig };
 
 	let config: undefined | ResolvedConfig;
 
@@ -74,9 +75,7 @@ function injectHTML(pluginConfig?: InjectHTMLConfig): Plugin {
 				['html', 'htm'].some((item) => {
 					const fileName = '/index.' + item;
 
-					const filePath = normalizePath(
-						path.join(root, url, fileName),
-					);
+					const filePath = normalizePath(path.join(root, url, fileName));
 
 					if (fs.existsSync(filePath)) {
 						url += fileName;
@@ -107,10 +106,7 @@ function injectHTML(pluginConfig?: InjectHTMLConfig): Plugin {
 				}
 
 				if (cfg.replace?.undefined) {
-					data = data.replace(
-						replaceAttrMatcher,
-						cfg.replace.undefined,
-					);
+					data = data.replace(replaceAttrMatcher, cfg.replace.undefined);
 				}
 
 				out = await renderSnippets(data, {
