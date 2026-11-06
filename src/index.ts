@@ -1,6 +1,12 @@
-import { normalizePath, Plugin, ResolvedConfig } from 'vite';
+import {
+	IndexHtmlTransformContext,
+	normalizePath,
+	Plugin,
+	ResolvedConfig,
+} from 'vite';
 import path from 'path';
 import fs from 'fs';
+import htmlEnvHook from './htmlEnvHook';
 
 const attrNameExpr = '[a-z0-9_-]+';
 const attrDataExpr = '[^"]*';
@@ -20,11 +26,7 @@ type InjectHTMLConfig = {
 };
 
 function injectHTML(pluginConfig?: InjectHTMLConfig): Plugin {
-	const {
-		tagName = 'load',
-		sourceAttr = 'src',
-		...cfg
-	} = { ...pluginConfig };
+	const { tagName = 'load', sourceAttr = 'src', ...cfg } = { ...pluginConfig };
 
 	let config: undefined | ResolvedConfig;
 
@@ -35,11 +37,14 @@ function injectHTML(pluginConfig?: InjectHTMLConfig): Plugin {
 
 	const fileList = new Set<string>();
 
-	async function renderSnippets(code: string, codePath: string) {
+	async function renderSnippets(code: string, ctx: IndexHtmlTransformContext) {
 		if (!config) {
 			return code;
 		}
 
+		const replaceHtmlEnv = htmlEnvHook(config);
+		code = (await replaceHtmlEnv(code, ctx)) as string;
+		const codePath = ctx.path;
 		const matches = code.matchAll(tagMatcher);
 
 		for (const match of matches) {
@@ -70,9 +75,7 @@ function injectHTML(pluginConfig?: InjectHTMLConfig): Plugin {
 				['html', 'htm'].some((item) => {
 					const fileName = '/index.' + item;
 
-					const filePath = normalizePath(
-						path.join(root, url, fileName),
-					);
+					const filePath = normalizePath(path.join(root, url, fileName));
 
 					if (fs.existsSync(filePath)) {
 						url += fileName;
@@ -103,13 +106,14 @@ function injectHTML(pluginConfig?: InjectHTMLConfig): Plugin {
 				}
 
 				if (cfg.replace?.undefined) {
-					data = data.replace(
-						replaceAttrMatcher,
-						cfg.replace.undefined,
-					);
+					data = data.replace(replaceAttrMatcher, cfg.replace.undefined);
 				}
 
-				out = await renderSnippets(data, url);
+				out = await renderSnippets(data, {
+					...ctx,
+					path: '/' + normalizePath(path.relative(config.root, filePath)),
+					filename: filePath,
+				});
 			} catch (error) {
 				if (error instanceof Error) {
 					throw new Error('injectHTML: ' + error.message);
@@ -138,14 +142,10 @@ function injectHTML(pluginConfig?: InjectHTMLConfig): Plugin {
 		},
 		transformIndexHtml: {
 			enforce: 'pre',
-			transform(html, ctx) {
-				return renderSnippets(html, ctx.path);
-			},
+			transform: renderSnippets,
 			// ^ Keeping for Vite below version 4.0.0
 			order: 'pre',
-			handler(html, ctx) {
-				return renderSnippets(html, ctx.path);
-			},
+			handler: renderSnippets,
 		},
 	};
 }

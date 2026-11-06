@@ -1,6 +1,6 @@
 {
 	"name": "vite-plugin-html-inject",
-	"version": "1.1.2",
+	"version": "1.2.0",
 	"description": "Split your index.html into multiple files and inject them where ever you want!",
 	"files": [
 		"dist"
@@ -48,9 +48,11 @@
 	},
 	"homepage": "https://github.com/donnikitos/vite-plugin-html-inject#readme",
 	"devDependencies": {
-		"@types/node": "^20.11.5",
-		"typescript": "^5.3.3",
-		"unbuild": "^2.0.0",
+		"@types/node": "^26.6.6",
+		"@typescript/typescript6": "^6.0.2",
+		"prettier": "^3.9.10",
+		"typescript": "^7.0.2",
+		"unbuild": "^3.6.1",
 		"vite": "^5.0.12"
 	},
 	"packageManager": "yarn@4.0.2"

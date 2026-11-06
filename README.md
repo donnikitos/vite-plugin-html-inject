@@ -40,6 +40,36 @@ export default defineConfig({
 </html>
 ```
 
+## Use environment variables in include paths
+
+Include paths support Vite's `%ENV_NAME%` syntax, including built-in variables such as `%MODE%` and custom variables exposed with the `VITE_` prefix (or your configured `envPrefix`).
+
+```html
+<load src="src/html/%MODE%/header.html" />
+<load src="src/html/%VITE_THEME%/footer.html" />
+```
+
+With `MODE=development` and `VITE_THEME=dark`, these load `src/html/development/header.html` and `src/html/dark/footer.html`.
+
+## Nest HTML includes
+
+Included files can load other HTML files. Paths starting with `./` or `../` resolve relative to the file containing the `<load>` tag; other paths resolve from the Vite project root.
+
+```html
+<!-- index.html -->
+<load src="src/html/header.html" />
+```
+
+```html
+<!-- src/html/header.html -->
+<header>
+	<load src="./header/branding.html" />
+	<load src="./%MODE%/navigation.html" />
+</header>
+```
+
+Nested includes also support environment variables and static arguments.
+
 ## Pass down static arguments to injected HTML parts
 
 The plugin also allows you to supply your HTML parts with some basic arguments, so you can reuse the same piece of code in multiple places.
